@@ -1,0 +1,186 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Main protocol model - stores COMPLETE protocol content
+model Protocol {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Basic identification
+  code             String   @unique // A001E, B002C, etc.
+  title            String // Full protocol name
+  dci              String? // International Non-Proprietary Name
+  specialtyCode    String? // Medical specialty classification
+
+  // URLs to official sources
+  cnasUrl          String? // Link to CNAS protocol page
+  officialPdfUrl   String // Link to official PDF on CNAS
+  storedPdfUrl     String? // Our stored backup PDF URL
+
+  // Complete content extraction (100% of PDF)
+  rawText          String   @db.Text // Complete raw text extracted
+  htmlContent      String   @db.Text // Full HTML version with formatting
+  structuredJson   Json? // Intelligent sections while preserving everything
+
+  // Metadata for organization
+  sublists         String[] // Disease codes, sublists
+  prescribers      String[] // Who can prescribe
+  canFamilyDoctor  Boolean  @default(false) // Can family doctor continue prescription
+
+  // Dates and versioning
+  publishDate      DateTime?
+  lastUpdateDate   DateTime?
+  orderNumber      String? // Ministry/CNAS order number
+  version          Int      @default(1)
+
+  // Search and filtering
+  searchVector     String? @db.Text // For full-text search
+  categories       String[] // Oncology, Rheumatology, etc.
+  keywords         String[] // Extracted keywords for better search
+
+  // Quality assurance
+  extractionQuality Float    @default(0) // 0-100 quality score
+  verified         Boolean   @default(false) // Admin verified extraction
+
+  // Relations
+  images           ProtocolImage[]
+  sections         ProtocolSection[]
+  versions         ProtocolVersion[]
+  bookmarks        Bookmark[]
+
+  @@index([code])
+  @@index([specialtyCode])
+  @@index([publishDate])
+  @@index([lastUpdateDate])
+  @@map("protocols")
+}
+
+// Store extracted images from PDFs with their positions
+model ProtocolImage {
+  id         String   @id @default(cuid())
+  protocolId String
+  protocol   Protocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+
+  imageUrl   String // URL to stored image
+  altText    String? // Description for accessibility
+  caption    String? // Image caption if available
+  pageNumber Int? // Original page number in PDF
+  position   Int // Order in the document
+  width      Int?
+  height     Int?
+
+  createdAt  DateTime @default(now())
+
+  @@index([protocolId])
+  @@map("protocol_images")
+}
+
+// Structured sections for better navigation (while preserving all content)
+model ProtocolSection {
+  id         String   @id @default(cuid())
+  protocolId String
+  protocol   Protocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+
+  // Section metadata
+  type       String // "indicatie", "criterii_includere", "tratament", etc.
+  title      String // Romanian section title
+  order      Int // Display order
+
+  // Complete section content
+  content    String   @db.Text // Full HTML content for this section
+  rawText    String   @db.Text // Plain text version
+
+  // Navigation
+  parentId   String? // For nested sections
+  parent     ProtocolSection? @relation("SectionHierarchy", fields: [parentId], references: [id])
+  children   ProtocolSection[] @relation("SectionHierarchy")
+
+  @@index([protocolId, order])
+  @@map("protocol_sections")
+}
+
+// Version history for tracking changes over time
+model ProtocolVersion {
+  id             String   @id @default(cuid())
+  protocolId     String
+  protocol       Protocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+
+  version        Int
+  createdAt      DateTime @default(now())
+
+  // Snapshot of full content at this version
+  title          String
+  rawText        String   @db.Text
+  htmlContent    String   @db.Text
+  structuredJson Json?
+
+  // What changed
+  changelog      String? @db.Text
+  orderNumber    String?
+  officialPdfUrl String
+
+  @@unique([protocolId, version])
+  @@index([protocolId])
+  @@map("protocol_versions")
+}
+
+// User bookmarks/favorites (for healthcare professionals)
+model Bookmark {
+  id         String   @id @default(cuid())
+  userId     String // User identifier (session-based or authenticated)
+  protocolId String
+  protocol   Protocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+
+  notes      String? @db.Text // Personal notes
+  tags       String[] // Custom tags
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, protocolId])
+  @@index([userId])
+  @@map("bookmarks")
+}
+
+// Scraper status and logs
+model ScraperRun {
+  id           String   @id @default(cuid())
+  startedAt    DateTime @default(now())
+  completedAt  DateTime?
+  status       String // "running", "completed", "failed"
+
+  protocolsFound    Int @default(0)
+  protocolsUpdated  Int @default(0)
+  protocolsAdded    Int @default(0)
+  protocolsFailed   Int @default(0)
+
+  errorLog     String? @db.Text
+  summary      Json?
+
+  @@index([startedAt])
+  @@map("scraper_runs")
+}
+
+// Search index for Romanian language full-text search
+model SearchIndex {
+  id         String   @id @default(cuid())
+  protocolId String   @unique
+
+  // Searchable fields
+  searchText String   @db.Text // Combines all searchable content
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("search_index")
+}
