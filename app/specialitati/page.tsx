@@ -29,6 +29,16 @@ function getCategoryIcon(category: string): string {
     'Psihiatrie': '🧘',
     'Dermatologie': '🩹',
     'Oftalmologie': '👁️',
+    'Imunologie': '🛡️',
+    'Boli Infecțioase': '🦠',
+    'Ginecologie': '👩‍⚕️',
+    'Urologie': '🩺',
+    'Pediatrie': '👶',
+    'Ortopedice': '🦿',
+    'Anestezie': '💊',
+    'ORL': '👂',
+    'Parazitologie': '🔬',
+    'Diverse': '📋',
   }
   return icons[category] || '📋'
 }
@@ -41,12 +51,22 @@ function getCategoryDescription(category: string): string {
     'Neurologie': 'Tratamente pentru afecțiuni neurologice și cerebrale',
     'Endocrinologie': 'Protocoale pentru diabet, hormoni și metabolism',
     'Pneumologie': 'Tratamente pentru afecțiuni respiratorii',
-    'Gastroenterologie': 'Protocoale pentru afecțiuni digestive',
-    'Hematologie': 'Tratamente pentru afecțiuni hematologice',
+    'Gastroenterologie': 'Protocoale pentru afecțiuni digestive și hepatice',
+    'Hematologie': 'Tratamente pentru afecțiuni hematologice și sanguine',
     'Nefrologie': 'Protocoale pentru afecțiuni renale',
-    'Psihiatrie': 'Tratamente pentru afecțiuni psihiatrice',
+    'Psihiatrie': 'Tratamente pentru afecțiuni psihiatrice și mentale',
     'Dermatologie': 'Protocoale pentru afecțiuni dermatologice',
     'Oftalmologie': 'Tratamente pentru afecțiuni oftalmologice',
+    'Imunologie': 'Protocoale pentru afecțiuni imunitare și imunoterapie',
+    'Boli Infecțioase': 'Tratamente pentru boli infecțioase și antivirale',
+    'Ginecologie': 'Protocoale pentru afecțiuni ginecologice',
+    'Urologie': 'Tratamente pentru afecțiuni urologice',
+    'Pediatrie': 'Protocoale pentru copii și nou-născuți',
+    'Ortopedice': 'Tratamente pentru afecțiuni osoase și articulare',
+    'Anestezie': 'Protocoale pentru anestezie și analgezie',
+    'ORL': 'Tratamente pentru afecțiuni ORL',
+    'Parazitologie': 'Protocoale pentru boli parazitare',
+    'Diverse': 'Alte protocoale terapeutice',
   }
   return descriptions[category] || 'Protocoale terapeutice'
 }
