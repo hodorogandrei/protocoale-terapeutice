@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
@@ -22,7 +22,7 @@ interface ProtocolsResponse {
   }
 }
 
-export default function ProtocolsPage() {
+function ProtocolsContent() {
   const searchParams = useSearchParams()
   const [data, setData] = useState<ProtocolsResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -174,5 +174,17 @@ export default function ProtocolsPage() {
 
       <Footer />
     </div>
+  )
+}
+
+export default function ProtocolsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-medical-blue" />
+      </div>
+    }>
+      <ProtocolsContent />
+    </Suspense>
   )
 }

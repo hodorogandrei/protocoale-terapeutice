@@ -5,11 +5,13 @@
   "scripts": {
     "dev": "next dev -p 4444",
     "build": "next build",
-    "start": "next start",
+    "prestart": "fuser -k 4444/tcp 2>/dev/null || lsof -ti:4444 | xargs kill -9 2>/dev/null || true",
+    "start": "next start -p 4444",
     "lint": "next lint",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "scraper": "tsx scripts/scraper.ts"
+    "scraper": "tsx scripts/scraper.ts",
+    "update-protocols": "tsx scripts/update-missing-protocols.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.3.0",

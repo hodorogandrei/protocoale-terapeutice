@@ -9,7 +9,8 @@ import type { Protocol } from '@/types/protocol'
 
 async function getProtocol(code: string): Promise<Protocol | null> {
   try {
-    const res = await fetch(`http://localhost:3000/api/protocols/${code}`, {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:4444'
+    const res = await fetch(`${baseUrl}/api/protocols/${code}`, {
       cache: 'no-store',
     })
 
