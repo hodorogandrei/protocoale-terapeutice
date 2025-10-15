@@ -76,3 +76,17 @@ coverage/
 # Temporary files
 tmp/
 temp/
+# Generated data files and logs
+data/*.json
+data/*.txt
+data/*.log
+
+# Keep PDF directory structure but ignore PDFs
+data/pdfs/*.pdf
+data/pdfs/**/*.pdf
+
+# Allow .gitkeep to preserve directory structure
+!data/.gitkeep
+!data/pdfs/.gitkeep
+!data/pdfs/individual/.gitkeep
+
