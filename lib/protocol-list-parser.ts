@@ -317,8 +317,58 @@ export function extractDetailedContent(
       // Found full protocol content - use it!
       console.log(`      ✓ Matched ${protocol.code} to full protocol (${section.content.length} chars)`)
 
+      // IMPORTANT: Extract the actual DCI/title from the section header, not the table header fragment
+      // Section content starts with: "Protocol terapeutic corespunzător poziţiei nr. XXX, cod (CODE): DCI"
+      // Sometimes DCI is on the same line, sometimes on the next line
+      const lines = section.content.split('\n')
+      const firstLine = lines[0] || ''
+      const secondLine = lines[1] || ''
+
+      let extractedDci: string | undefined
+
+      // Try to extract DCI from first line (format: "...cod (CODE): DCI SOMETHING")
+      const sameLine = firstLine.match(/:\s*DCI[:\s]*(.+?)$/i)
+      if (sameLine && sameLine[1].trim().length > 2) {
+        extractedDci = sameLine[1].trim()
+      }
+
+      // If DCI not on first line or is just "DCI", try second line (DCI often appears alone on next line)
+      if (!extractedDci || extractedDci.match(/^DCI\s*$/i)) {
+        const secondLineTrimmed = secondLine.trim()
+        // Check if second line is uppercase and looks like a DCI name
+        if (secondLineTrimmed && secondLineTrimmed.length > 2 &&
+            secondLineTrimmed.match(/^[A-Z][A-Z\s,]+$/)) {
+          extractedDci = secondLineTrimmed
+        }
+      }
+
+      // If still no DCI, try a broader search in first few lines
+      if (!extractedDci) {
+        const firstLines = lines.slice(0, 5).join('\n')
+        const multiLineDciMatch = firstLines.match(/DCI[:\s]*\n?\s*([A-Z][A-Za-z\s,]+?)(?:\n|$)/i)
+        extractedDci = multiLineDciMatch ? multiLineDciMatch[1].trim() : undefined
+      }
+
+      // Use the extracted DCI as the title if available and better than current title
+      // Only replace title if current title looks corrupted
+      let finalTitle = protocol.title
+      let finalDci = protocol.dci
+
+      if (extractedDci && extractedDci.length > 2) {
+        // If current title is corrupted (contains "poziţiei", "corespunz", etc.), replace it with DCI
+        if (protocol.title.match(/poziţiei|corespunz|ă tor pozi|Protocol terapeutic/i)) {
+          finalTitle = extractedDci
+          finalDci = extractedDci
+        } else if (!protocol.dci && extractedDci) {
+          // Otherwise just update DCI if it was missing
+          finalDci = extractedDci
+        }
+      }
+
       return {
         ...protocol,
+        title: finalTitle,
+        dci: finalDci,
         content: section.content,
         startPage: protocol.startPage,
         endPage: protocol.endPage,

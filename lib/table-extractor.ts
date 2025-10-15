@@ -341,21 +341,93 @@ function parseProtocolRow(row: TableRow, pageNumber: number): ExtractedProtocol 
 
   const code = codeMatch[1]
 
-  // Extract title - text after the code
-  let title = rowText.replace(code, '').trim()
+  // IMPROVED: Extract title from individual cells, not from joined row text
+  // This prevents capturing text from adjacent cells or table headers
+  let title = ''
+  let codeCell: TableCell | undefined
+  let titleCell: TableCell | undefined
 
-  // Remove common prefixes/suffixes
-  title = title.replace(/^[\s\-–—:]+/, '').replace(/[\s\-–—:]+$/, '').trim()
-
-  // If title is empty or too short, try using all cells
-  if (!title || title.length < 3) {
-    // Try to find title in other cells (exclude cells that are just codes)
-    const nonCodeCells = row.cells.filter(cell =>
-      cell.text && !cell.text.match(/^[A-Z]{1,2}\d{2,4}[A-Z]{0,3}(?:\d{2})?(?:-[A-Z]+)?$/)
-    )
-    if (nonCodeCells.length > 0) {
-      title = nonCodeCells.map(c => c.text).join(' ').trim()
+  // Strategy 1: Find the cell containing the code
+  for (const cell of row.cells) {
+    if (cell.text.includes(code)) {
+      codeCell = cell
+      break
     }
+  }
+
+  // Strategy 2: Get title from the appropriate cell
+  if (codeCell) {
+    // Find cell index containing the code
+    const codeIndex = row.cells.indexOf(codeCell)
+
+    // Title is typically in the same cell or next cell after the code
+    // First, try to extract title from the same cell (after the code)
+    const cellText = codeCell.text
+    const codePosition = cellText.indexOf(code)
+    const textAfterCode = cellText.substring(codePosition + code.length).trim()
+
+    if (textAfterCode && textAfterCode.length > 3 &&
+        !/^[\s\-–—:()]+$/.test(textAfterCode) &&
+        !textAfterCode.match(/^(ă tor pozi|tor pozi|DCI|cod\s*[\(:)])/i)) {
+      // Valid title found in same cell
+      title = textAfterCode
+      titleCell = codeCell
+    } else {
+      // Try next cell (common in multi-column tables)
+      const nextCell = row.cells[codeIndex + 1]
+      if (nextCell && nextCell.text && nextCell.text.length > 2) {
+        // Filter out common non-title patterns
+        if (!nextCell.text.match(/^(DCI|cod\s*[\(:)]|ă tor|tor pozi|\d+)/i) &&
+            !nextCell.text.match(/^[\s\-–—:()]+$/)) {
+          title = nextCell.text
+          titleCell = nextCell
+        }
+      }
+
+      // If still no title, try cell before code (some tables have title before code)
+      if (!title && codeIndex > 0) {
+        const prevCell = row.cells[codeIndex - 1]
+        if (prevCell && prevCell.text && prevCell.text.length > 2) {
+          if (!prevCell.text.match(/^(DCI|cod|nr\.|poziţiei|\d+)/i)) {
+            title = prevCell.text
+            titleCell = prevCell
+          }
+        }
+      }
+    }
+  }
+
+  // Fallback: Use old method but with better filtering
+  if (!title || title.length < 3) {
+    // Try to find title in non-code cells, excluding common table header fragments
+    const nonCodeCells = row.cells.filter(cell => {
+      if (!cell.text || cell.text.length < 3) return false
+      if (cell.text.match(/^[A-Z]{1,2}\d{2,4}[A-Z]{0,3}(?:\d{2})?(?:-[A-Z]+)?$/)) return false
+      // Exclude common table header fragments
+      if (cell.text.match(/^(ă tor pozi|tor pozi|corespunz|DCI|cod\s*[\(:)]|nr\.|poziţiei)/i)) return false
+      if (cell.text.match(/^[\s\-–—:()]+$/)) return false
+      return true
+    })
+
+    if (nonCodeCells.length > 0) {
+      title = nonCodeCells[0].text // Take first valid non-code cell
+    } else {
+      // Last resort: extract from rowText, but clean it better
+      title = rowText.replace(code, '').trim()
+    }
+  }
+
+  // Clean up title
+  title = title
+    .replace(/^[\s\-–—:]+/, '') // Remove leading punctuation
+    .replace(/[\s\-–—:]+$/, '') // Remove trailing punctuation
+    .replace(/^\(+|\)+$/g, '') // Remove wrapping parentheses
+    .replace(/^DCI[:\s]+/i, '') // Remove "DCI:" prefix
+    .trim()
+
+  // Filter out remaining corrupted fragments
+  if (title.match(/^(ă tor|tor pozi|corespunz|poziţiei|nr\.|cod[\s\(:])/i)) {
+    return null // This is not a valid title, skip this row
   }
 
   // Skip if still no valid title
@@ -377,11 +449,13 @@ function parseProtocolRow(row: TableRow, pageNumber: number): ExtractedProtocol 
   // 1. Valid code format
   // 2. Title length (not too short, not too long)
   // 3. Title contains letters (not just numbers/symbols)
+  // 4. Title doesn't contain corrupted fragments
   let confidence = 70 // Base confidence
 
   if (/^[A-Z]{1,2}\d{2,4}[A-Z]{0,3}(?:\d{2})?(?:-[A-Z]+)?$/.test(code)) confidence += 10 // Valid code format
   if (title.length > 5 && title.length < 300) confidence += 10 // Reasonable length (more lenient)
   if (/[a-zA-ZăâîșțĂÂÎȘȚ]{3,}/.test(title)) confidence += 10 // Contains actual words (including Romanian chars)
+  if (!title.match(/poziţiei|corespunz|ă tor/i)) confidence += 5 // Doesn't contain corrupted fragments
 
   return {
     code,
@@ -412,16 +486,37 @@ export function parseProtocolsFromText(text: string): ExtractedProtocol[] {
       // Collect title from this line and potentially next lines
       let title = titlePart.trim()
 
+      // Filter out corrupted fragments immediately
+      if (title.match(/^(ă tor pozi|tor pozi|corespunz|poziţiei|nr\.|cod\s*[\(:])/i)) {
+        continue // Skip this malformed entry
+      }
+
       // Check if title continues on next lines
       for (let j = i + 1; j < Math.min(i + 3, lines.length); j++) {
         const nextLine = lines[j].trim()
 
         // If next line doesn't start with a protocol code and isn't empty, it might be continuation
         if (nextLine && !nextLine.match(/^[A-Z]{1,2}\d{2,4}[A-Z]{0,3}(?:\d{2})?(?:-[A-Z]+)?\s/)) {
-          title += ' ' + nextLine
+          // Don't add corrupted continuation lines
+          if (!nextLine.match(/^(ă tor pozi|tor pozi|corespunz|poziţiei|nr\.|cod\s*[\(:])/i)) {
+            title += ' ' + nextLine
+          }
         } else {
           break
         }
+      }
+
+      // Clean up title
+      title = title
+        .replace(/^[\s\-–—:]+/, '') // Remove leading punctuation
+        .replace(/[\s\-–—:]+$/, '') // Remove trailing punctuation
+        .replace(/^\(+|\)+$/g, '') // Remove wrapping parentheses
+        .replace(/^DCI[:\s]+/i, '') // Remove "DCI:" prefix
+        .trim()
+
+      // Final check: reject if title contains corrupted fragments
+      if (title.match(/poziţiei|corespunz|ă tor pozi|tor pozi/i)) {
+        continue
       }
 
       // Skip if title is too short
