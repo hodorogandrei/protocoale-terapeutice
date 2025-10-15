@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { BookmarkButton } from '@/components/protocol/bookmark-button'
+import { FormattedProtocolView } from '@/components/protocol/formatted-protocol-view'
 import type { Protocol } from '@/types/protocol'
 import { formatDate, formatDateShort } from '@/lib/utils'
 import { UI_TEXT } from '@/types/protocol'
@@ -31,17 +32,6 @@ export function ProtocolViewer({ protocol }: ProtocolViewerProps) {
               {protocol.verified && (
                 <Badge variant="secondary">✓ Verificat</Badge>
               )}
-              <Badge
-                variant={
-                  protocol.extractionQuality >= 80
-                    ? 'default'
-                    : protocol.extractionQuality >= 60
-                    ? 'secondary'
-                    : 'destructive'
-                }
-              >
-                Calitate: {protocol.extractionQuality.toFixed(0)}%
-              </Badge>
               {protocol.status === 'variant' && (
                 <Badge variant="outline" className="border-gray-400 text-gray-600">
                   Variantă / Cod Genetic
@@ -248,35 +238,21 @@ export function ProtocolViewer({ protocol }: ProtocolViewerProps) {
   )
 }
 
-// Structured View - Organized in tabs by section
+// Structured View - Intelligent formatted view with featured sections
 function StructuredView({ protocol }: { protocol: Protocol }) {
-  if (!protocol.sections || protocol.sections.length === 0) {
-    return <DocumentView protocol={protocol} />
+  // Use new formatted protocol view with intelligent section extraction
+  // Falls back to rawText if htmlContent unavailable
+  const textContent = protocol.rawText || protocol.htmlContent || ''
+
+  if (!textContent) {
+    return (
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+        <p className="text-gray-600">Nu există conținut disponibil pentru acest protocol.</p>
+      </div>
+    )
   }
 
-  return (
-    <Tabs defaultValue={protocol.sections[0]?.type || 'all'} className="w-full">
-      <TabsList className="w-full flex-wrap h-auto">
-        {protocol.sections.map((section) => (
-          <TabsTrigger key={section.id} value={section.type} className="text-sm">
-            {UI_TEXT.protocol.sections[section.type as keyof typeof UI_TEXT.protocol.sections] || section.title}
-          </TabsTrigger>
-        ))}
-      </TabsList>
-
-      {protocol.sections.map((section) => (
-        <TabsContent key={section.id} value={section.type} className="mt-6">
-          <div className="prose prose-slate max-w-none">
-            <h2 className="text-2xl font-bold mb-4">{section.title}</h2>
-            <div
-              dangerouslySetInnerHTML={{ __html: section.content }}
-              className="protocol-content"
-            />
-          </div>
-        </TabsContent>
-      ))}
-    </Tabs>
-  )
+  return <FormattedProtocolView rawText={textContent} protocolCode={protocol.code} />
 }
 
 // Document View - Full HTML content as a single document
