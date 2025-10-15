@@ -39,9 +39,15 @@ export async function GET() {
       },
     })
 
+    // Use protocol lastUpdateDate if available, otherwise fall back to most recent scraper run
+    let lastUpdate = lastProtocol?.lastUpdateDate
+    if (!lastUpdate && recentScrapes.length > 0) {
+      lastUpdate = recentScrapes[0].completedAt || recentScrapes[0].startedAt
+    }
+
     return NextResponse.json({
       totalProtocols,
-      lastUpdate: lastProtocol?.lastUpdateDate,
+      lastUpdate,
       categoryCounts: categoryCount,
       recentScrapes,
     })

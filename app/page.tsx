@@ -65,15 +65,15 @@ export default async function HomePage() {
             </div>
 
             {/* Important Disclaimer - Full Width */}
-            <div className="mb-6 md:mb-8 relative z-10">
-              <div className="bg-amber-50/90 backdrop-blur-sm border-y-2 border-amber-300/70 py-4 md:py-6 shadow-lg">
-                <div className="flex items-start gap-3 md:gap-4 max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
-                  <span className="text-amber-600 text-2xl flex-shrink-0">⚠️</span>
+            <div className="mb-8 md:mb-12 relative z-10">
+              <div className="bg-amber-50/90 backdrop-blur-sm border-y-2 border-amber-300/70 py-6 md:py-8 shadow-lg">
+                <div className="flex items-start gap-4 md:gap-6 max-w-[95vw] mx-auto px-6 md:px-12 lg:px-16">
+                  <span className="text-amber-600 text-3xl md:text-4xl flex-shrink-0 mt-1">⚠️</span>
                   <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-bold text-gray-900 mb-3">Informații Importante</h3>
+                    <h3 className="text-lg md:text-2xl font-bold text-gray-900 mb-4 md:mb-6">Informații Importante</h3>
 
-                    <div className="space-y-3 text-sm md:text-base text-gray-800 leading-relaxed">
-                      <p>
+                    <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+                      <p className="text-sm md:text-base text-gray-800 leading-relaxed">
                         Aceasta este o platformă <strong>independentă</strong>, fără nicio afiliere cu CNAS sau alte instituții guvernamentale. Toate datele sunt extrase automat din{' '}
                         <a
                           href="https://cnas.ro/protocoale-terapeutice/"
@@ -86,7 +86,7 @@ export default async function HomePage() {
                         .
                       </p>
 
-                      <p className="pt-3 border-t-2 border-amber-300">
+                      <p className="text-sm md:text-base text-gray-800 leading-relaxed md:pl-6 md:border-l-2 md:border-amber-300">
                         Platforma a fost dezvoltată pe bază <strong>voluntară</strong>, astfel <strong>pot exista erori de extracție și/sau întârzieri</strong> comparativ cu sursa oficială. Deși facem tot posibilul să prezentăm informații actualizate într-un format accesibil, <strong className="text-red-700">NU putem garanta acuratețea</strong> informațiilor. Vă încurajăm să <strong className="text-red-700">verificați informațiile cu un profesionist medical calificat (de exemplu, un medic specialist sau medic de familie)</strong> și să consultați sursa oficială CNAS înainte de a lua orice decizie, <strong>mai ales în situații critice</strong>.
                       </p>
                     </div>
@@ -138,7 +138,7 @@ export default async function HomePage() {
                       </div>
                       <div>
                         <div className="text-xl md:text-2xl font-semibold text-gray-900">
-                          {stats.lastUpdate ? formatDateShort(stats.lastUpdate) : 'N/A'}
+                          {stats.lastUpdate ? formatDateShort(stats.lastUpdate) : 'În actualizare'}
                         </div>
                         <div className="text-xs md:text-sm font-medium text-gray-600">Actualizare</div>
                       </div>
@@ -151,7 +151,7 @@ export default async function HomePage() {
         </section>
 
         {/* Features Section - Centered */}
-        <section className="py-12 md:py-16 relative overflow-hidden">
+        <section className="py-16 md:py-24 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-white via-blue-50/20 to-purple-50/20" />
 
           <div className="relative px-4 md:px-8 lg:px-12">
@@ -203,7 +203,7 @@ export default async function HomePage() {
 
         {/* Categories Section - Fluid */}
         {stats && stats.categoryCounts && Object.keys(stats.categoryCounts).length > 0 && (
-          <section className="py-12 md:py-16 relative overflow-hidden bg-gradient-to-br from-slate-50 to-blue-50/20">
+          <section className="py-16 md:py-24 relative overflow-hidden bg-gradient-to-br from-slate-50 to-blue-50/20">
             <div className="px-4 md:px-8 lg:px-12">
               <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-12 gap-6">
                 <div>
@@ -244,7 +244,7 @@ export default async function HomePage() {
         )}
 
         {/* CTA Section - Fluid */}
-        <section className="relative py-16 md:py-20 overflow-hidden">
+        <section className="relative py-20 md:py-28 overflow-hidden">
           {/* Animated Gradient Background */}
           <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1),transparent_50%)]" />

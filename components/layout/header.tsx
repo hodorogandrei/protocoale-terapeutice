@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Search, Menu, Bookmark, Home } from 'lucide-react'
+import { Search, Menu, Bookmark, Home, FileText, Activity } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
@@ -20,25 +20,27 @@ export function Header() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex items-center space-x-8 text-base font-medium flex-1">
+        <nav className="flex items-center gap-2 text-base font-medium flex-1">
           <Link
             href="/"
-            className="transition-colors hover:text-medical-blue text-foreground/60 py-2"
+            className="transition-colors hover:text-medical-blue text-foreground/60 py-2 px-3 rounded-lg hover:bg-blue-50 flex items-center gap-2"
           >
-            <Home className="h-6 w-6 sm:hidden" />
+            <Home className="h-5 w-5" />
             <span className="hidden sm:inline">Acasă</span>
           </Link>
           <Link
             href="/protocoale"
-            className="transition-colors hover:text-medical-blue text-foreground/60 py-2"
+            className="transition-colors hover:text-medical-blue text-foreground/60 py-2 px-3 rounded-lg hover:bg-blue-50 flex items-center gap-2"
           >
-            Toate Protocoalele
+            <FileText className="h-5 w-5" />
+            <span className="hidden sm:inline">Toate Protocoalele</span>
           </Link>
           <Link
             href="/specialitati"
-            className="transition-colors hover:text-medical-blue text-foreground/60 py-2"
+            className="transition-colors hover:text-medical-blue text-foreground/60 py-2 px-3 rounded-lg hover:bg-blue-50 flex items-center gap-2"
           >
-            Specialități
+            <Activity className="h-5 w-5" />
+            <span className="hidden sm:inline">Specialități</span>
           </Link>
         </nav>
 

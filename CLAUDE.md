@@ -2,9 +2,11 @@
 
 ## Project Overview
 
-**Protocoale Terapeutice România** is a comprehensive Romanian therapeutic protocols platform that extracts, processes, and presents CNAS (Casa Națională de Asigurări de Sănătate) therapeutic protocols in an accessible, searchable format. The system handles complete PDF extraction, intelligent data classification, multi-source protocol aggregation, and provides a modern Next.js-based frontend for healthcare professionals.
+**Protocoale Terapeutice România** is an **independent** comprehensive Romanian therapeutic protocols platform that extracts, processes, and presents CNAS (Casa Națională de Asigurări de Sănătate) therapeutic protocols in an accessible, searchable format. **This platform has no affiliation with CNAS or any governmental institutions.** The system handles complete PDF extraction from official CNAS sources, intelligent data classification, multi-source protocol aggregation, and provides a modern Next.js-based frontend for healthcare professionals.
 
-**Primary Goal**: Transform complex CNAS PDF documents into structured, searchable, and accessible therapeutic protocol data while maintaining 100% content fidelity.
+**Primary Goal**: Transform complex CNAS PDF documents (extracted from official sources) into structured, searchable, and accessible therapeutic protocol data while maintaining 100% content fidelity.
+
+**Legal Status**: Independent voluntary project. All data is extracted from official CNAS sources at https://cnas.ro/protocoale-terapeutice/
 
 ## Technology Stack
 
