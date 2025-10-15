@@ -43,6 +43,13 @@ model Protocol {
   orderNumber      String? // Ministry/CNAS order number
   version          Int      @default(1)
 
+  // Protocol status and classification
+  status           String   @default("active") // "active", "discontinued", "pending", "variant"
+  statusReason     String? // Why protocol is discontinued/pending
+  parentProtocolCode String? // For genetic variants (e.g., G1244E → parent protocol)
+  lastCnasUpdate   DateTime? // Date from latest CNAS PDF update
+  cnasOrderNumber  String? // CNAS order number (e.g., "564/499/2021")
+
   // Search and filtering
   searchVector     String? @db.Text // For full-text search
   categories       String[] // Oncology, Rheumatology, etc.
