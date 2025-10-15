@@ -32,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="ro" className={inter.variable}>
+    <html lang="ro" className={`${inter.variable} scroll-smooth`} suppressHydrationWarning>
       <body className="antialiased min-h-screen">
         {children}
       </body>

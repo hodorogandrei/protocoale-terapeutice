@@ -1,8 +1,8 @@
 import Link from 'next/link'
-import { ArrowRight, FileText, Search as SearchIcon, Zap } from 'lucide-react'
+import { ArrowRight, FileText, Search, Zap, Sparkles, Activity } from 'lucide-react'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
-import { SearchBar } from '@/components/protocol/search-bar'
+import { AdvancedSearchBar } from '@/components/protocol/advanced-search-bar'
 import { CategoryCard } from '@/components/protocol/category-card'
 import { Button } from '@/components/ui/button'
 import { formatDateShort } from '@/lib/utils'
@@ -29,62 +29,65 @@ export default async function HomePage() {
   const stats = await getStats()
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
       <Header />
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="bg-gradient-to-b from-blue-50 to-white py-16 md:py-24">
-          <div className="container px-4">
-            <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
-                Protocoale Terapeutice România
-              </h1>
-              <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-                Platformă modernă pentru accesarea protocoalelor terapeutice CNAS.
-                Căutare rapidă, vizualizare structurată, conținut complet.
-              </p>
-            </div>
+        {/* Hero Section - Fluid Design */}
+        <section className="relative overflow-hidden">
+          {/* Animated Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.1),transparent_50%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(168,85,247,0.08),transparent_50%)]" />
 
-            {/* Search Bar */}
-            <div className="max-w-3xl mx-auto mb-8">
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <SearchBar />
+          <div className="relative py-8 md:py-10">
+            {/* Hero Content - Centered */}
+            <div className="px-4 md:px-8 lg:px-12">
+              <div className="mb-6 md:mb-8 text-center max-w-5xl mx-auto">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100/80 backdrop-blur-sm rounded-full mb-4">
+                  <Sparkles className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-700">Platformă independentă voluntară</span>
+                </div>
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4 tracking-tight leading-tight">
+                  Protocoale <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Terapeutice</span>
+                </h1>
+                <p className="text-lg md:text-xl lg:text-2xl text-gray-600 leading-relaxed">
+                  Căutare inteligentă. Informații structurate.
+                </p>
+              </div>
+
+              {/* Advanced Search Bar - Centered */}
+              <div className="mb-6 md:mb-8 max-w-4xl mx-auto relative z-50">
+                <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl p-4 md:p-6 border border-white/20">
+                  <AdvancedSearchBar autoFocus showHistory />
+                </div>
               </div>
             </div>
 
-            {/* Disclaimer and Mentions */}
-            <div className="max-w-3xl mx-auto mb-12">
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm">
-                <div className="flex items-start gap-3">
-                  <div className="text-amber-600 text-xl mt-0.5">ℹ️</div>
-                  <div className="flex-1 space-y-2">
-                    <p className="text-gray-800 font-medium">
-                      Platformă informațională neoficială
-                    </p>
-                    <div className="text-gray-700 space-y-1.5">
+            {/* Important Disclaimer - Full Width */}
+            <div className="mb-6 md:mb-8 relative z-10">
+              <div className="bg-amber-50/90 backdrop-blur-sm border-y-2 border-amber-300/70 py-4 md:py-6 shadow-lg">
+                <div className="flex items-start gap-3 md:gap-4 max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
+                  <span className="text-amber-600 text-2xl flex-shrink-0">⚠️</span>
+                  <div className="flex-1">
+                    <h3 className="text-base md:text-lg font-bold text-gray-900 mb-3">Informații Importante</h3>
+
+                    <div className="space-y-3 text-sm md:text-base text-gray-800 leading-relaxed">
                       <p>
-                        Această platformă oferă acces simplificat la protocoalele terapeutice publicate de{' '}
+                        Aceasta este o platformă <strong>independentă</strong>, fără nicio afiliere cu CNAS sau alte instituții guvernamentale. Toate datele sunt extrase automat din{' '}
                         <a
                           href="https://cnas.ro/protocoale-terapeutice/"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-medical-blue hover:underline font-medium"
+                          className="text-blue-600 hover:underline font-semibold"
                         >
-                          CNAS
+                          baza de date oficială a CNAS
                         </a>
-                        . Informațiile sunt extrase automat și pot conține erori sau întârzieri față de sursa oficială.
+                        .
                       </p>
-                      <p>
-                        <strong>Nu reprezintă sfat medical.</strong> Pentru decizii terapeutice, consultați întotdeauna un medic specialist. Sursa oficială: {' '}
-                        <a
-                          href="https://cnas.ro/protocoale-terapeutice/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-medical-blue hover:underline"
-                        >
-                          cnas.ro/protocoale-terapeutice
-                        </a>
+
+                      <p className="pt-3 border-t-2 border-amber-300">
+                        Platforma a fost dezvoltată pe bază <strong>voluntară</strong>, astfel <strong>pot exista erori de extracție și/sau întârzieri</strong> comparativ cu sursa oficială. Deși facem tot posibilul să prezentăm informații actualizate într-un format accesibil, <strong className="text-red-700">NU putem garanta acuratețea</strong> informațiilor. Vă încurajăm să <strong className="text-red-700">verificați informațiile cu un profesionist medical calificat (de exemplu, un medic specialist sau medic de familie)</strong> și să consultați sursa oficială CNAS înainte de a lua orice decizie, <strong>mai ales în situații critice</strong>.
                       </p>
                     </div>
                   </div>
@@ -92,93 +95,137 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Stats */}
-            {stats && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-                <div className="bg-white p-4 rounded-lg shadow-md text-center">
-                  <div className="text-3xl font-bold text-medical-blue">
-                    {stats.totalProtocols}
+            {/* Stats - Centered Layout */}
+            <div className="px-4 md:px-8 lg:px-12">
+              {stats && (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 max-w-5xl mx-auto">
+                  <Link href="/protocoale" className="group">
+                    <div className="bg-white/80 backdrop-blur-sm p-4 md:p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border border-white/50">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-100 rounded-xl group-hover:bg-blue-200 transition-colors">
+                          <FileText className="h-6 w-6 md:h-8 md:w-8 text-blue-600" />
+                        </div>
+                        <div>
+                          <div className="text-3xl md:text-4xl font-bold text-gray-900">
+                            {stats.totalProtocols}
+                          </div>
+                          <div className="text-xs md:text-sm font-medium text-gray-600">Protocoale</div>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+
+                  <Link href="/specialitati" className="group">
+                    <div className="bg-white/80 backdrop-blur-sm p-4 md:p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border border-white/50">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-green-100 rounded-xl group-hover:bg-green-200 transition-colors">
+                          <Activity className="h-6 w-6 md:h-8 md:w-8 text-green-600" />
+                        </div>
+                        <div>
+                          <div className="text-3xl md:text-4xl font-bold text-gray-900">
+                            {Object.keys(stats.categoryCounts || {}).length}
+                          </div>
+                          <div className="text-xs md:text-sm font-medium text-gray-600">Specialități</div>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+
+                  <div className="bg-white/80 backdrop-blur-sm p-4 md:p-6 rounded-2xl shadow-lg border border-white/50">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-purple-100 rounded-xl">
+                        <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-purple-600" />
+                      </div>
+                      <div>
+                        <div className="text-xl md:text-2xl font-semibold text-gray-900">
+                          {stats.lastUpdate ? formatDateShort(stats.lastUpdate) : 'N/A'}
+                        </div>
+                        <div className="text-xs md:text-sm font-medium text-gray-600">Actualizare</div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-600">Protocoale</div>
                 </div>
-                <div className="bg-white p-4 rounded-lg shadow-md text-center">
-                  <div className="text-3xl font-bold text-medical-green">
-                    {Object.keys(stats.categoryCounts || {}).length}
-                  </div>
-                  <div className="text-sm text-gray-600">Specialități</div>
-                </div>
-                <div className="bg-white p-4 rounded-lg shadow-md text-center">
-                  <div className="text-3xl font-bold text-medical-blue">
-                    100%
-                  </div>
-                  <div className="text-sm text-gray-600">Conținut Extras</div>
-                </div>
-                <div className="bg-white p-4 rounded-lg shadow-md text-center">
-                  <div className="text-sm font-semibold text-gray-700">
-                    {stats.lastUpdate
-                      ? formatDateShort(stats.lastUpdate)
-                      : 'N/A'}
-                  </div>
-                  <div className="text-sm text-gray-600">Ultima Actualizare</div>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </section>
 
-        {/* Features Section */}
-        <section className="py-16 md:py-24">
-          <div className="container px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">
-              De ce să folosești această platformă?
-            </h2>
+        {/* Features Section - Centered */}
+        <section className="py-12 md:py-16 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-white via-blue-50/20 to-purple-50/20" />
 
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                <div className="text-4xl mb-4">🔍</div>
-                <h3 className="text-xl font-bold mb-3">Căutare Avansată</h3>
-                <p className="text-gray-600">
-                  Caută rapid după medicament, boală, specialitate sau cod protocol.
-                  Rezultate instant cu highlighting.
+          <div className="relative px-4 md:px-8 lg:px-12">
+            <div className="mb-10 text-center max-w-4xl mx-auto">
+              <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">
+                La ce este utilă<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                  această platformă?
+                </span>
+              </h2>
+              <p className="text-xl text-gray-600">
+                Tehnologie modernă pentru accesul la informații medicale esențiale
+              </p>
+            </div>
+
+            <div className="grid lg:grid-cols-3 gap-6 md:gap-8">
+              <div className="group bg-gradient-to-br from-white to-blue-50/30 p-8 md:p-10 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-white/50">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Search className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-2xl md:text-3xl font-bold mb-4">Căutare Inteligentă</h3>
+                <p className="text-gray-600 text-lg leading-relaxed">
+                  Sugestii automate, istoric căutări, rezultate instant după medicament sau boală.
                 </p>
               </div>
 
-              <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                <div className="text-4xl mb-4">📄</div>
-                <h3 className="text-xl font-bold mb-3">Conținut Complet</h3>
-                <p className="text-gray-600">
-                  Vizualizează întregul conținut al protocoalelor, nu doar PDF-uri.
-                  Text formatat, tabele, imagini - totul accesibil.
+              <div className="group bg-gradient-to-br from-white to-purple-50/30 p-8 md:p-10 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-white/50">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <FileText className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-2xl md:text-3xl font-bold mb-4">Conținut Structurat</h3>
+                <p className="text-gray-600 text-lg leading-relaxed">
+                  Vizualizare organizată, text formatat, tabele interactive și navigare intuitivă.
                 </p>
               </div>
 
-              <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                <div className="text-4xl mb-4">⚡</div>
-                <h3 className="text-xl font-bold mb-3">Actualizări Automate</h3>
-                <p className="text-gray-600">
-                  Protocoale actualizate zilnic direct de pe site-ul CNAS.
-                  Notificări pentru modificări.
+              <div className="group bg-gradient-to-br from-white to-pink-50/30 p-8 md:p-10 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-white/50">
+                <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Zap className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-2xl md:text-3xl font-bold mb-4">Acces Rapid</h3>
+                <p className="text-gray-600 text-lg leading-relaxed">
+                  Interfață rapidă și intuitivă pentru accesarea protocoalelor terapeutice.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Categories Section */}
+        {/* Categories Section - Fluid */}
         {stats && stats.categoryCounts && Object.keys(stats.categoryCounts).length > 0 && (
-          <section className="py-16 bg-gray-50">
-            <div className="container px-4">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-3xl font-bold">Explorează după Specialitate</h2>
+          <section className="py-12 md:py-16 relative overflow-hidden bg-gradient-to-br from-slate-50 to-blue-50/20">
+            <div className="px-4 md:px-8 lg:px-12">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-12 gap-6">
+                <div>
+                  <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-3">
+                    Explorează după<br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                      Specialitate
+                    </span>
+                  </h2>
+                  <p className="text-xl text-gray-600">
+                    {Object.keys(stats.categoryCounts).length} specialități medicale disponibile
+                  </p>
+                </div>
                 <Link href="/specialitati">
-                  <Button variant="outline">
-                    Vezi toate
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                  <Button size="lg" className="text-base px-8 h-14 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                    Vezi toate specialitățile
+                    <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
               </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {Object.entries(stats.categoryCounts)
                   .sort(([, a], [, b]) => (b as number) - (a as number))
                   .map(([category, count]) => (
@@ -196,28 +243,43 @@ export default async function HomePage() {
           </section>
         )}
 
-        {/* CTA Section */}
-        <section className="py-16 md:py-24 bg-medical-blue text-white">
-          <div className="container px-4 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Gata să începi?
-            </h2>
-            <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto opacity-90">
-              Accesează protocoalele terapeutice într-un mod modern, rapid și ușor de utilizat
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/protocoale">
-                <Button size="lg" variant="secondary">
-                  <FileText className="mr-2 h-5 w-5" />
-                  Toate Protocoalele
-                </Button>
-              </Link>
-              <Link href="/protocoale">
-                <Button size="lg" variant="outline" className="bg-transparent text-white border-white hover:bg-white hover:text-medical-blue">
-                  <SearchIcon className="mr-2 h-5 w-5" />
-                  Caută Protocol
-                </Button>
-              </Link>
+        {/* CTA Section - Fluid */}
+        <section className="relative py-16 md:py-20 overflow-hidden">
+          {/* Animated Gradient Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1),transparent_50%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(255,255,255,0.08),transparent_50%)]" />
+
+          <div className="relative px-4 md:px-8 lg:px-12">
+            <div className="max-w-4xl">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full mb-8">
+                <Sparkles className="h-4 w-4 text-white" />
+                <span className="text-sm font-medium text-white">Începe acum</span>
+              </div>
+
+              <h2 className="text-5xl md:text-7xl font-bold mb-8 text-white tracking-tight leading-tight">
+                Găsește protocolul<br />
+                de care ai nevoie
+              </h2>
+
+              <p className="text-xl md:text-2xl mb-12 text-white/90 leading-relaxed max-w-2xl">
+                Acces instant la peste {stats?.totalProtocols || 320} protocoale terapeutice din baza de date CNAS
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link href="/protocoale">
+                  <Button size="lg" className="text-lg px-10 py-7 h-auto rounded-xl bg-white text-blue-600 hover:bg-gray-100 shadow-2xl">
+                    <FileText className="mr-3 h-6 w-6" />
+                    Explorează Protocoalele
+                  </Button>
+                </Link>
+                <Link href="/specialitati">
+                  <Button size="lg" variant="outline" className="text-lg px-10 py-7 h-auto rounded-xl bg-transparent text-white border-2 border-white hover:bg-white hover:text-blue-600">
+                    <Activity className="mr-3 h-6 w-6" />
+                    Vezi Specialitățile
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </section>

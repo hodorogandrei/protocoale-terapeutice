@@ -27,18 +27,18 @@ export function SearchBar({
 
   return (
     <form onSubmit={handleSearch} className={className}>
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="text"
             placeholder={placeholder}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-12 h-14 text-lg rounded-xl"
           />
         </div>
-        <Button type="submit">Caută</Button>
+        <Button type="submit" size="lg" className="h-14 px-8 text-lg rounded-xl">Caută</Button>
       </div>
     </form>
   )
