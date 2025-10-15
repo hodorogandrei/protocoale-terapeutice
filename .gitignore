@@ -41,6 +41,10 @@ prisma/migrations/
 /data/pdfs/
 /data/temp/
 
+# Vector databases and runtime storage
+chroma_db/
+storage/
+
 # IDE - VSCode
 .vscode/*
 !.vscode/settings.json
