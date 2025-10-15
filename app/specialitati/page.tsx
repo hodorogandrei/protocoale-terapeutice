@@ -3,6 +3,10 @@ import { Footer } from '@/components/layout/footer'
 import { CategoryCard } from '@/components/protocol/category-card'
 import { Separator } from '@/components/ui/separator'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 async function getStats() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:4444'

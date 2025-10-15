@@ -7,6 +7,10 @@ import { CategoryCard } from '@/components/protocol/category-card'
 import { Button } from '@/components/ui/button'
 import { formatDateShort } from '@/lib/utils'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 async function getStats() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:4444'
