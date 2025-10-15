@@ -118,36 +118,46 @@ async function extractFullProtocols() {
             })
             updated++
             totalUpdated++
-          } else if (existing.rawText.length < protocol.content.length) {
-            // Update with fuller content
-            console.log(`   ↻ Updating ${protocol.code}: ${existing.rawText.length} → ${protocol.content.length} chars`)
+          } else {
+            // Check if existing title is corrupted
+            const hasCorruptedTitle = existing.title.match(/poziţiei|corespunz|ă tor pozi|Protocol terapeutic.*cod.*\(\)/i)
 
             // Clean content by removing redundant headers
             const cleanedText = removeRedundantHeader(protocol.content)
-
-            // Extract clean title
             const cleanTitle = extractCleanTitle(protocol.title, cleanedText)
 
-            const htmlContent = `<div class="protocol"><h1>${cleanTitle}</h1>${protocol.dci ? `<p class="dci"><strong>DCI:</strong> ${protocol.dci}</p>` : ''}<pre>${cleanedText}</pre></div>`
-            const cleanedHtml = removeRedundantHeaderFromHTML(htmlContent)
+            // Update if: longer content, corrupted title, or better title available
+            const shouldUpdate = existing.rawText.length < protocol.content.length ||
+                                hasCorruptedTitle ||
+                                (cleanTitle.length > 5 && cleanTitle !== existing.title && !existing.title.includes(cleanTitle))
 
-            await db.protocol.update({
-              where: { code: protocol.code },
-              data: {
-                title: cleanTitle,
-                dci: protocol.dci || existing.dci,
-                rawText: cleanedText,
-                htmlContent: cleanedHtml,
-                storedPdfUrl: `/data/pdfs/${pdfFile}`,
-                extractionQuality: Math.max(existing.extractionQuality, protocol.confidence || 100),
-                lastUpdateDate: new Date(),
-                updatedAt: new Date(),
-              }
-            })
-            updated++
-            totalUpdated++
-          } else {
-            skipped++
+            if (shouldUpdate) {
+              const reason = hasCorruptedTitle ? 'corrupted title' :
+                            existing.rawText.length < protocol.content.length ? `${existing.rawText.length} → ${protocol.content.length} chars` :
+                            'better title'
+              console.log(`   ↻ Updating ${protocol.code}: ${reason}`)
+
+              const htmlContent = `<div class="protocol"><h1>${cleanTitle}</h1>${protocol.dci ? `<p class="dci"><strong>DCI:</strong> ${protocol.dci}</p>` : ''}<pre>${cleanedText}</pre></div>`
+              const cleanedHtml = removeRedundantHeaderFromHTML(htmlContent)
+
+              await db.protocol.update({
+                where: { code: protocol.code },
+                data: {
+                  title: cleanTitle,
+                  dci: protocol.dci || existing.dci,
+                  rawText: cleanedText,
+                  htmlContent: cleanedHtml,
+                  storedPdfUrl: `/data/pdfs/${pdfFile}`,
+                  extractionQuality: Math.max(existing.extractionQuality, protocol.confidence || 100),
+                  lastUpdateDate: new Date(),
+                  updatedAt: new Date(),
+                }
+              })
+              updated++
+              totalUpdated++
+            } else {
+              skipped++
+            }
           }
 
           totalProcessed++
