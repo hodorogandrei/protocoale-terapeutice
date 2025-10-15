@@ -24,6 +24,13 @@ export interface Protocol {
   orderNumber?: string | null
   version: number
 
+  // Protocol status
+  status: string // "active" | "discontinued" | "pending" | "variant"
+  statusReason?: string | null
+  parentProtocolCode?: string | null
+  lastCnasUpdate?: Date | null
+  cnasOrderNumber?: string | null
+
   searchVector?: string | null
   categories: string[]
   keywords: string[]
