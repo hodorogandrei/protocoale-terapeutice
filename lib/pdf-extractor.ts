@@ -14,6 +14,7 @@ import * as fs from 'fs/promises'
 import pdf from 'pdf-parse'
 import { ProtocolStructure, ProtocolStructuredSection } from '../types/protocol'
 import { getSectionType } from './utils'
+import { extractTablesFromPDF } from './table-extractor'
 
 export interface ExtractedContent {
   rawText: string
@@ -31,6 +32,9 @@ export interface ExtractedContent {
     creationDate?: Date
     modificationDate?: Date
   }
+  // New: Table extraction results
+  hasTabularData?: boolean
+  tableCount?: number
 }
 
 export async function extractPdfContent(pdfPath: string): Promise<ExtractedContent> {
@@ -50,6 +54,27 @@ export async function extractPdfContent(pdfPath: string): Promise<ExtractedConte
 
     // Extract raw text (100% of content)
     const rawText = pdfData.text
+
+    // Attempt table extraction for better structured data
+    let hasTabularData = false
+    let tableCount = 0
+
+    try {
+      console.log(`   🔍 Detecting tables...`)
+      const tables = await extractTablesFromPDF(pdfPath)
+      tableCount = tables.length
+      hasTabularData = tableCount > 0
+
+      if (hasTabularData) {
+        console.log(`   ✓ Detected ${tableCount} table(s)`)
+      }
+    } catch (error) {
+      // Silently handle table detection errors - not critical
+      const errorMsg = error instanceof Error ? error.message : String(error)
+      if (process.env.DEBUG) {
+        console.warn(`   ⚠️  Table detection skipped: ${errorMsg}`)
+      }
+    }
 
     // Calculate extraction quality based on text length and structure
     const quality = calculateExtractionQuality(rawText, pdfData.numpages)
@@ -93,6 +118,8 @@ export async function extractPdfContent(pdfPath: string): Promise<ExtractedConte
       categories,
       keywords,
       metadata,
+      hasTabularData,
+      tableCount,
     }
   } catch (error) {
     console.error(`   ❌ PDF extraction failed:`, error)
@@ -181,7 +208,8 @@ function convertTextToHTML(text: string): string {
  */
 async function structureProtocolContent(
   text: string,
-  pdfData: any
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  pdfData: unknown
 ): Promise<ProtocolStructure | null> {
   try {
     // Romanian protocol section patterns
@@ -220,17 +248,15 @@ async function structureProtocolContent(
         // Save previous section if exists
         if (currentSection && sectionContent.length > 0) {
           currentSection.content = convertTextToHTML(sectionContent.join('\n'))
-          currentSection.rawText = sectionContent.join('\n')
           sections.push(currentSection)
         }
 
         // Start new section
         currentSection = {
-          type: matchedSection.type as any,
+          type: matchedSection.type as 'indicatie' | 'criterii_includere' | 'criterii_excludere' | 'tratament' | 'contraindicatii' | 'atentionari' | 'monitorizare' | 'criterii_intrerupere' | 'prescriptori',
           title: line,
           order: sections.length + 1,
           content: '',
-          rawText: '',
         }
 
         sectionContent = []
@@ -246,7 +272,6 @@ async function structureProtocolContent(
     // Add final section
     if (currentSection && sectionContent.length > 0) {
       currentSection.content = convertTextToHTML(sectionContent.join('\n'))
-      currentSection.rawText = sectionContent.join('\n')
       sections.push(currentSection)
     }
 
