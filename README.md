@@ -1,6 +1,6 @@
 # Protocoale Terapeutice România 🇷🇴
 
-Platformă modernă pentru accesarea și vizualizarea protocoalelor terapeutice din România (CNAS).
+Platformă independentă cu date de la CNAS pentru accesarea și vizualizarea protocoalelor terapeutice din România.
 
 ## 🎯 Caracteristici Principale
 
@@ -252,7 +252,7 @@ Contribuții sunt binevenite! Te rugăm să:
 
 ## 📄 License
 
-Acest proiect este open source. Protocoalele terapeutice sunt proprietatea CNAS România.
+Acest proiect este open source și independent. Protocoalele terapeutice sunt proprietatea CNAS România și sunt extrase din sursa oficială.
 
 ## 🙏 Credits
 

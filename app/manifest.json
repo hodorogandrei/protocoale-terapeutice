@@ -1,7 +1,7 @@
 {
   "name": "Protocoale Terapeutice România",
   "short_name": "Protocoale RO",
-  "description": "Platformă modernă pentru protocoale terapeutice CNAS România",
+  "description": "Platformă independentă cu date de la CNAS pentru protocoale terapeutice România",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

@@ -9,8 +9,8 @@ export function Footer() {
           <div className="space-y-3">
             <h3 className="text-lg font-semibold">Despre Platformă</h3>
             <p className="text-sm text-muted-foreground">
-              Platformă modernă pentru accesarea protocoalelor terapeutice din România.
-              Date actualizate zilnic de pe site-ul CNAS.
+              Platformă independentă pentru accesarea protocoalelor terapeutice din România.
+              Date extrase din baza de date oficială CNAS.
             </p>
           </div>
 
@@ -67,8 +67,8 @@ export function Footer() {
           <div className="space-y-3">
             <h3 className="text-lg font-semibold">Informații Legale</h3>
             <p className="text-xs text-muted-foreground">
-              Protocoalele terapeutice sunt publicate cu rol informativ.
-              Toate datele provin de pe site-ul oficial CNAS România.
+              Platformă independentă. Protocoalele terapeutice sunt publicate cu rol informativ.
+              Toate datele sunt extrase din baza de date oficială CNAS România.
             </p>
           </div>
         </div>

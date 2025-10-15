@@ -9,15 +9,15 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'Protocoale Terapeutice România | Platforma Modernă CNAS',
-  description: 'Platformă modernă și ușor de utilizat pentru protocoale terapeutice din România. Căutare avansată, vizualizare structurată și acces rapid la protocoalele CNAS.',
+  title: 'Protocoale Terapeutice România | Platformă cu date de la CNAS',
+  description: 'Platformă independentă și ușor de utilizat pentru protocoale terapeutice din România. Căutare avansată, vizualizare structurată și acces rapid la protocoalele extrase din baza de date CNAS.',
   keywords: ['protocoale terapeutice', 'CNAS', 'medicament', 'România', 'tratament', 'protocol medical'],
   authors: [{ name: 'Protocoale Terapeutice România' }],
   openGraph: {
     type: 'website',
     locale: 'ro_RO',
     title: 'Protocoale Terapeutice România',
-    description: 'Platforma modernă pentru protocoale terapeutice CNAS',
+    description: 'Platformă independentă cu date de la CNAS pentru protocoale terapeutice',
     siteName: 'Protocoale Terapeutice România',
   },
   robots: {
