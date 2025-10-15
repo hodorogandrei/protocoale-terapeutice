@@ -14,6 +14,15 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '10mb',
     },
   },
+  // Serve local PDF files
+  async rewrites() {
+    return [
+      {
+        source: '/data/pdfs/:path*',
+        destination: '/api/pdfs/:path*',
+      },
+    ]
+  },
 }
 
 export default nextConfig
