@@ -91,8 +91,8 @@ async function extractFullProtocols() {
             // Clean content by removing redundant headers
             const cleanedText = removeRedundantHeader(protocol.content)
 
-            // Extract clean title
-            const cleanTitle = extractCleanTitle(protocol.title, cleanedText)
+            // Extract clean title (pass code for validation)
+            const cleanTitle = extractCleanTitle(protocol.title, cleanedText, protocol.code)
 
             const htmlContent = `<div class="protocol"><h1>${cleanTitle}</h1>${protocol.dci ? `<p class="dci"><strong>DCI:</strong> ${protocol.dci}</p>` : ''}<pre>${cleanedText}</pre></div>`
             const cleanedHtml = removeRedundantHeaderFromHTML(htmlContent)
@@ -124,7 +124,7 @@ async function extractFullProtocols() {
 
             // Clean content by removing redundant headers
             const cleanedText = removeRedundantHeader(protocol.content)
-            const cleanTitle = extractCleanTitle(protocol.title, cleanedText)
+            const cleanTitle = extractCleanTitle(protocol.title, cleanedText, protocol.code)
 
             // Update if: longer content, corrupted title, or better title available
             const shouldUpdate = existing.rawText.length < protocol.content.length ||

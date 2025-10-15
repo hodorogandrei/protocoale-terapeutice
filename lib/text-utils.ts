@@ -2,21 +2,24 @@
  * Text processing utilities for protocol content
  */
 
+import { validateAndCorrectTitle, extractTitleFromRawText, isTitleCorrupted } from './title-validator'
+
 /**
  * Extract clean title from verbose protocol header
  *
  * Converts:
- *   "Protocol terapeutic corespunzător poziţiei nr. 13, cod (): DCI"
+ *   "Protocol terapeutic corespunzător poziţiei nr. 13, cod (A001E): DCI"
  * To:
  *   "DCI"
  *
- * If content is provided and title is generic ("DCI"), extracts the first meaningful line from content.
+ * Uses enhanced validation to detect and correct corrupted titles.
  *
  * @param rawTitle - Raw title extracted from PDF
  * @param content - Optional protocol content to extract title from if rawTitle is generic
+ * @param code - Optional protocol code for validation
  * @returns Clean, concise protocol title
  */
-export function extractCleanTitle(rawTitle: string, content?: string): string {
+export function extractCleanTitle(rawTitle: string, content?: string, code?: string): string {
   if (!rawTitle) return rawTitle
 
   // Remove quotes
@@ -39,9 +42,20 @@ export function extractCleanTitle(rawTitle: string, content?: string): string {
     .replace(/^Pagina:\s*\d+\s*/i, '') // Remove "Pagina: 171"
     .trim()
 
+  // NEW: Use advanced validation if we have code and content
+  if (code && content) {
+    // Check if extracted title is corrupted
+    if (isTitleCorrupted(cleaned) || cleaned.length < 5) {
+      const corrected = validateAndCorrectTitle(code, cleaned, content)
+      if (corrected) {
+        return corrected
+      }
+    }
+  }
+
   // If title is empty, too generic, or just "DCI", try to extract from content
   if ((!cleaned || cleaned.toUpperCase() === 'DCI' || cleaned.length < 3) && content) {
-    const titleFromContent = extractTitleFromContent(content)
+    const titleFromContent = extractTitleFromContent(content, code)
     if (titleFromContent && titleFromContent.length > 3) {
       return titleFromContent
     }
@@ -60,10 +74,17 @@ export function extractCleanTitle(rawTitle: string, content?: string): string {
  * Looks for the first meaningful line (drug name, condition, etc.)
  *
  * @param content - Protocol content
+ * @param code - Optional protocol code for enhanced extraction
  * @returns Extracted title or empty string
  */
-function extractTitleFromContent(content: string): string {
+function extractTitleFromContent(content: string, code?: string): string {
   if (!content) return ''
+
+  // NEW: Use enhanced extraction if code is provided
+  if (code) {
+    const extracted = extractTitleFromRawText(code, content)
+    if (extracted) return extracted
+  }
 
   // Get first few lines
   const lines = content.split('\n').slice(0, 10)
