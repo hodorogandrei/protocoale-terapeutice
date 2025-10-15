@@ -13,6 +13,7 @@ import {
   enhanceProtocols,
   extractDetailedContent
 } from '../lib/protocol-list-parser'
+import { removeRedundantHeader, removeRedundantHeaderFromHTML, extractCleanTitle } from '../lib/text-utils'
 import * as path from 'path'
 
 const PDF_STORAGE_PATH = path.join(process.cwd(), 'data', 'pdfs')
@@ -86,14 +87,24 @@ async function extractFullProtocols() {
 
           if (!existing) {
             console.log(`   ⊕ New protocol: ${protocol.code}`)
+
+            // Clean content by removing redundant headers
+            const cleanedText = removeRedundantHeader(protocol.content)
+
+            // Extract clean title
+            const cleanTitle = extractCleanTitle(protocol.title, cleanedText)
+
+            const htmlContent = `<div class="protocol"><h1>${cleanTitle}</h1>${protocol.dci ? `<p class="dci"><strong>DCI:</strong> ${protocol.dci}</p>` : ''}<pre>${cleanedText}</pre></div>`
+            const cleanedHtml = removeRedundantHeaderFromHTML(htmlContent)
+
             // Create new protocol
             await db.protocol.create({
               data: {
                 code: protocol.code,
-                title: protocol.title,
+                title: cleanTitle,
                 dci: protocol.dci,
-                rawText: protocol.content,
-                htmlContent: `<div class="protocol"><h1>${protocol.title}</h1>${protocol.dci ? `<p class="dci"><strong>DCI:</strong> ${protocol.dci}</p>` : ''}<pre>${protocol.content}</pre></div>`,
+                rawText: cleanedText,
+                htmlContent: cleanedHtml,
                 officialPdfUrl: `https://cnas.ro/wp-content/uploads/2025/01/${pdfFile.replace('full-protocols-', '').replace('.pdf', '.pdf')}`,
                 storedPdfUrl: `/data/pdfs/${pdfFile}`,
                 extractionQuality: protocol.confidence || 100,
@@ -111,13 +122,22 @@ async function extractFullProtocols() {
             // Update with fuller content
             console.log(`   ↻ Updating ${protocol.code}: ${existing.rawText.length} → ${protocol.content.length} chars`)
 
+            // Clean content by removing redundant headers
+            const cleanedText = removeRedundantHeader(protocol.content)
+
+            // Extract clean title
+            const cleanTitle = extractCleanTitle(protocol.title, cleanedText)
+
+            const htmlContent = `<div class="protocol"><h1>${cleanTitle}</h1>${protocol.dci ? `<p class="dci"><strong>DCI:</strong> ${protocol.dci}</p>` : ''}<pre>${cleanedText}</pre></div>`
+            const cleanedHtml = removeRedundantHeaderFromHTML(htmlContent)
+
             await db.protocol.update({
               where: { code: protocol.code },
               data: {
-                title: protocol.title,
+                title: cleanTitle,
                 dci: protocol.dci || existing.dci,
-                rawText: protocol.content,
-                htmlContent: `<div class="protocol"><h1>${protocol.title}</h1>${protocol.dci ? `<p class="dci"><strong>DCI:</strong> ${protocol.dci}</p>` : ''}<pre>${protocol.content}</pre></div>`,
+                rawText: cleanedText,
+                htmlContent: cleanedHtml,
                 storedPdfUrl: `/data/pdfs/${pdfFile}`,
                 extractionQuality: Math.max(existing.extractionQuality, protocol.confidence || 100),
                 lastUpdateDate: new Date(),
