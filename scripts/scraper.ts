@@ -12,6 +12,12 @@
 import { CheerioCrawler, Dataset } from 'crawlee'
 import { db } from '../lib/db'
 import { extractPdfContent } from '../lib/pdf-extractor'
+import {
+  parseProtocolList as parseProtocolListNew,
+  validateProtocols,
+  enhanceProtocols,
+  extractDetailedContent
+} from '../lib/protocol-list-parser'
 import * as fs from 'fs/promises'
 import * as path from 'path'
 
@@ -26,6 +32,17 @@ interface ScrapedProtocol {
   cnasUrl?: string
   publishDate?: string
   orderNumber?: string
+}
+
+interface ParsedProtocol {
+  code: string
+  title: string
+  dci?: string
+  content: string
+  startPage?: number
+  endPage?: number
+  confidence?: number
+  additionalInfo?: string
 }
 
 export async function scrapeCNASProtocols() {
@@ -208,6 +225,109 @@ export async function scrapeCNASProtocols() {
   }
 }
 
+/**
+ * Parse protocol list PDF and extract individual protocols
+ * (IMPROVED VERSION - uses advanced table extraction)
+ */
+async function parseProtocolList(
+  pdfPath: string,
+  rawText: string,
+  pageCount: number,
+  title: string
+): Promise<ParsedProtocol[]> {
+  try {
+    // Use the new improved parser
+    const result = await parseProtocolListNew(pdfPath, rawText, pageCount, title)
+
+    if (!result.isProtocolList || result.protocols.length === 0) {
+      return []
+    }
+
+    console.log(`   📊 Parser used ${result.method} method with ${result.quality}% quality`)
+
+    // Validate and enhance protocols
+    let protocols = validateProtocols(result.protocols)
+    protocols = enhanceProtocols(protocols)
+
+    // Extract detailed content for each protocol
+    protocols = extractDetailedContent(protocols, rawText)
+
+    console.log(`   ✅ Successfully parsed ${protocols.length} protocols`)
+
+    return protocols
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    if (process.env.DEBUG) {
+      console.error(`   ❌ Advanced parsing failed: ${errorMsg}`)
+    }
+
+    // Fallback to basic parsing if advanced parsing fails
+    try {
+      return parseProtocolListFallback(rawText)
+    } catch (fallbackError) {
+      const fallbackMsg = fallbackError instanceof Error ? fallbackError.message : String(fallbackError)
+      console.error(`   ❌ Fallback parsing also failed: ${fallbackMsg}`)
+      return []
+    }
+  }
+}
+
+/**
+ * Fallback parser (original simple implementation)
+ */
+function parseProtocolListFallback(rawText: string): ParsedProtocol[] {
+  const protocols: ParsedProtocol[] = []
+  const lines = rawText.split('\n')
+  let currentProtocol: ParsedProtocol | null = null
+  let contentBuffer: string[] = []
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim()
+
+    // Check if this line starts a new protocol (more flexible pattern)
+    const match = line.match(/^([A-Z]\d{3,4}[A-Z]?)\s+(.+)/)
+
+    if (match) {
+      // Save previous protocol if exists
+      if (currentProtocol && contentBuffer.length > 0) {
+        currentProtocol.content = contentBuffer.join('\n')
+        protocols.push(currentProtocol)
+      }
+
+      // Start new protocol
+      const [, code, title] = match
+      currentProtocol = {
+        code: code.trim(),
+        title: title.trim(),
+        content: '',
+        confidence: 50 // Lower confidence for fallback method
+      }
+      contentBuffer = []
+
+      // Try to extract DCI from next few lines
+      for (let j = i + 1; j < Math.min(i + 5, lines.length); j++) {
+        const nextLine = lines[j].trim()
+        if (nextLine.match(/DCI/i) || nextLine.match(/^[A-Z][a-z]+(\s*,\s*[A-Z][a-z]+)*$/)) {
+          currentProtocol.dci = nextLine.replace(/DCI:?\s*/i, '').trim()
+          break
+        }
+      }
+    } else if (currentProtocol) {
+      // Add content to current protocol
+      contentBuffer.push(line)
+    }
+  }
+
+  // Add final protocol
+  if (currentProtocol && contentBuffer.length > 0) {
+    currentProtocol.content = contentBuffer.join('\n')
+    protocols.push(currentProtocol)
+  }
+
+  console.log(`   📋 Fallback parser found ${protocols.length} protocols`)
+  return protocols
+}
+
 async function downloadAndProcessProtocol(
   protocol: ScrapedProtocol,
   existingId?: string
@@ -219,8 +339,62 @@ async function downloadAndProcessProtocol(
   console.log(`   🔍 Extracting content from PDF...`)
   const extractedContent = await extractPdfContent(pdfPath)
 
+  // Try parsing as protocol list using improved parser
+  console.log(`   🔍 Analyzing PDF structure...`)
+  const individualProtocols = await parseProtocolList(
+    pdfPath,
+    extractedContent.rawText,
+    extractedContent.metadata.pageCount,
+    protocol.title
+  )
+
+  if (individualProtocols.length > 0) {
+    console.log(`   📋 Detected protocol list with ${individualProtocols.length} protocols`)
+
+    // Process each individual protocol from the list
+    let processedCount = 0
+    for (const individualProtocol of individualProtocols) {
+      try {
+        await processIndividualProtocol({
+          code: individualProtocol.code,
+          title: individualProtocol.title,
+          dci: individualProtocol.dci,
+          content: individualProtocol.content,
+          originalPdfPath: pdfPath,
+          sourcePdfUrl: protocol.pdfUrl,
+          cnasUrl: protocol.cnasUrl,
+          confidence: individualProtocol.confidence,
+        })
+        processedCount++
+      } catch (error) {
+        console.error(`   ❌ Failed to process ${individualProtocol.code}: ${error}`)
+      }
+    }
+
+    console.log(`   ✅ Processed ${processedCount}/${individualProtocols.length} protocols from list`)
+    return
+  }
+
+  // Single protocol - process normally
+  console.log(`   📄 Processing as single protocol`)
+  await processSingleProtocol(protocol, extractedContent, pdfPath, existingId)
+}
+
+async function processSingleProtocol(
+  protocol: ScrapedProtocol,
+  extractedContent: any,
+  pdfPath: string,
+  existingId?: string
+) {
+  // Sanitize extracted text to remove invalid UTF8 bytes
+  const sanitizedRawText = sanitizeText(extractedContent.rawText)
+  const sanitizedHtmlContent = sanitizeText(extractedContent.htmlContent)
+
   // Generate protocol code if not provided
-  const code = protocol.code || generateProtocolCode(protocol.title)
+  const code = protocol.code || generateProtocolCode(protocol.title, protocol.pdfUrl)
+
+  // Create local PDF URL
+  const localPdfUrl = `/data/pdfs/${path.basename(pdfPath)}`
 
   if (existingId) {
     // Update existing protocol with new version
@@ -236,9 +410,10 @@ async function downloadAndProcessProtocol(
       data: {
         title: protocol.title,
         officialPdfUrl: protocol.pdfUrl,
+        storedPdfUrl: localPdfUrl,
         cnasUrl: protocol.cnasUrl,
-        rawText: extractedContent.rawText,
-        htmlContent: extractedContent.htmlContent,
+        rawText: sanitizedRawText,
+        htmlContent: sanitizedHtmlContent,
         structuredJson: extractedContent.structuredJson as any,
         version: newVersion,
         extractionQuality: extractedContent.quality,
@@ -255,9 +430,10 @@ async function downloadAndProcessProtocol(
         code,
         title: protocol.title,
         officialPdfUrl: protocol.pdfUrl,
+        storedPdfUrl: localPdfUrl,
         cnasUrl: protocol.cnasUrl,
-        rawText: extractedContent.rawText,
-        htmlContent: extractedContent.htmlContent,
+        rawText: sanitizedRawText,
+        htmlContent: sanitizedHtmlContent,
         structuredJson: extractedContent.structuredJson as any,
         sublists: extractedContent.sublists || [],
         prescribers: extractedContent.prescribers || [],
@@ -270,6 +446,85 @@ async function downloadAndProcessProtocol(
     })
 
     console.log(`   ✅ Protocol created`)
+  }
+}
+
+async function processIndividualProtocol(data: {
+  code: string
+  title: string
+  dci?: string
+  content: string
+  originalPdfPath: string
+  sourcePdfUrl: string
+  cnasUrl?: string
+  confidence?: number
+}) {
+  try {
+    // Validate inputs
+    if (!data.code || !data.title) {
+      throw new Error(`Invalid protocol data: missing code or title`)
+    }
+
+    // Check if protocol already exists
+    const existing = await db.protocol.findUnique({
+      where: { code: data.code },
+    })
+
+    // Sanitize content
+    const sanitizedContent = sanitizeText(data.content)
+    const sanitizedHtmlContent = `<div class="protocol"><h1>${sanitizeText(data.title)}</h1><pre>${sanitizeText(data.content)}</pre></div>`
+
+    // Local PDF URL points to the list PDF
+    const localPdfUrl = `/data/pdfs/${path.basename(data.originalPdfPath)}`
+
+    // Use confidence score if provided, otherwise default to 85
+    const extractionQuality = data.confidence || 85
+
+    if (existing) {
+      // Update existing
+      await db.protocol.update({
+        where: { code: data.code },
+        data: {
+          title: data.title,
+          dci: data.dci,
+          officialPdfUrl: data.sourcePdfUrl,
+          storedPdfUrl: localPdfUrl,
+          cnasUrl: data.cnasUrl,
+          rawText: sanitizedContent,
+          htmlContent: sanitizedHtmlContent,
+          extractionQuality,
+          lastUpdateDate: new Date(),
+          updatedAt: new Date(),
+        },
+      })
+      console.log(`      ✓ Updated ${data.code} (confidence: ${extractionQuality}%)`)
+    } else {
+      // Create new
+      await db.protocol.create({
+        data: {
+          code: data.code,
+          title: data.title,
+          dci: data.dci,
+          officialPdfUrl: data.sourcePdfUrl,
+          storedPdfUrl: localPdfUrl,
+          cnasUrl: data.cnasUrl,
+          rawText: sanitizedContent,
+          htmlContent: sanitizedHtmlContent,
+          sublists: [],
+          prescribers: [],
+          categories: [],
+          keywords: [],
+          extractionQuality,
+          publishDate: new Date(),
+          lastUpdateDate: new Date(),
+        },
+      })
+      console.log(`      ✓ Created ${data.code} (confidence: ${extractionQuality}%)`)
+    }
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    console.error(`      ✗ Failed to process ${data.code}: ${errorMsg}`)
+    throw error // Re-throw to be caught by caller
   }
 }
 
@@ -293,14 +548,25 @@ async function downloadPDF(url: string, code?: string): Promise<string> {
   return filePath
 }
 
-function generateProtocolCode(title: string): string {
-  // Generate a unique code from title
-  const hash = title
+function generateProtocolCode(title: string, url: string): string {
+  // Generate a unique code from URL to avoid collisions
+  const urlHash = Buffer.from(url).toString('base64')
     .replace(/[^a-zA-Z0-9]/g, '')
-    .substring(0, 8)
+    .substring(0, 10)
     .toUpperCase()
 
-  return `AUTO${hash}`
+  // Add timestamp to ensure uniqueness
+  const timestamp = Date.now().toString().slice(-6)
+
+  return `AUTO${urlHash}${timestamp}`
+}
+
+function sanitizeText(text: string): string {
+  // Remove null bytes and other invalid UTF8 characters
+  return text
+    .replace(/\0/g, '') // Remove null bytes
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove other control characters
+    .trim()
 }
 
 // Run scraper if called directly
