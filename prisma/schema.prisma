@@ -25,7 +25,8 @@ model Protocol {
   // URLs to official sources
   cnasUrl          String? // Link to CNAS protocol page
   officialPdfUrl   String // Link to official PDF on CNAS
-  storedPdfUrl     String? // Our stored backup PDF URL
+  officialPdfPage  Int? // Page number in multi-protocol official PDF
+  storedPdfUrl     String? // Individual protocol PDF from formaremedicala.ro
 
   // Complete content extraction (100% of PDF)
   rawText          String   @db.Text // Complete raw text extracted

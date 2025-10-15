@@ -9,6 +9,7 @@ export interface Protocol {
 
   cnasUrl?: string | null
   officialPdfUrl: string
+  officialPdfPage?: number | null
   storedPdfUrl?: string | null
 
   rawText: string

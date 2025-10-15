@@ -154,15 +154,35 @@ export function ProtocolViewer({ protocol }: ProtocolViewerProps) {
 
         {/* Actions */}
         <div className="flex flex-wrap gap-2">
+          {protocol.storedPdfUrl && (
+            <a
+              href={protocol.storedPdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              download
+            >
+              <Button>
+                <Download className="mr-2 h-4 w-4" />
+                PDF Individual
+              </Button>
+            </a>
+          )}
+
           <a
             href={protocol.officialPdfUrl}
             target="_blank"
             rel="noopener noreferrer"
             download
+            title={protocol.officialPdfPage ? `Pagina ${protocol.officialPdfPage} în PDF multi-protocol CNAS` : 'PDF oficial CNAS'}
           >
-            <Button>
+            <Button variant={protocol.storedPdfUrl ? "outline" : "default"}>
               <Download className="mr-2 h-4 w-4" />
-              Descarcă PDF Original
+              PDF Oficial CNAS
+              {protocol.officialPdfPage && (
+                <Badge variant="secondary" className="ml-2">
+                  p. {protocol.officialPdfPage}
+                </Badge>
+              )}
             </Button>
           </a>
 
@@ -328,30 +348,67 @@ function DocumentView({ protocol }: { protocol: Protocol }) {
 
 // PDF View - Embedded PDF viewer
 function PDFView({ protocol }: { protocol: Protocol }) {
+  // Prioritize individual PDF (storedPdfUrl) over official multi-protocol PDF
+  const pdfUrl = protocol.storedPdfUrl || protocol.officialPdfUrl
+  const isIndividual = !!protocol.storedPdfUrl
+  const pdfSource = isIndividual ? 'FormareMedicala.ro' : 'CNAS oficial'
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
-        <div className="flex items-center gap-2">
-          <FileText className="h-5 w-5 text-medical-blue" />
-          <span className="font-semibold">Vizualizare PDF Original</span>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-medical-blue" />
+            <span className="font-semibold">
+              {isIndividual ? 'Vizualizare PDF Individual' : 'Vizualizare PDF Original CNAS'}
+            </span>
+          </div>
+          <span className="text-xs text-muted-foreground">
+            Sursă: {pdfSource}
+            {!isIndividual && protocol.officialPdfPage && ` (Pagina ${protocol.officialPdfPage})`}
+          </span>
         </div>
-        <a
-          href={protocol.officialPdfUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          download
-        >
-          <Button>
-            <Download className="mr-2 h-4 w-4" />
-            Descarcă
-          </Button>
-        </a>
+        <div className="flex gap-2">
+          {protocol.storedPdfUrl && protocol.storedPdfUrl !== pdfUrl && (
+            <a
+              href={protocol.storedPdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button variant="outline" size="sm">
+                PDF Individual
+              </Button>
+            </a>
+          )}
+          {protocol.officialPdfUrl !== pdfUrl && (
+            <a
+              href={protocol.officialPdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button variant="outline" size="sm">
+                PDF CNAS
+              </Button>
+            </a>
+          )}
+          <a
+            href={pdfUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            download
+          >
+            <Button>
+              <Download className="mr-2 h-4 w-4" />
+              Descarcă
+            </Button>
+          </a>
+        </div>
       </div>
 
       {/* PDF Embed */}
       <div className="border rounded-lg overflow-hidden bg-gray-100">
         <iframe
-          src={`${protocol.officialPdfUrl}#view=FitH`}
+          src={`${pdfUrl}${isIndividual ? '' : '#view=FitH'}`}
           className="w-full"
           style={{ height: '800px' }}
           title="Protocol PDF"
@@ -360,9 +417,9 @@ function PDFView({ protocol }: { protocol: Protocol }) {
 
       <div className="text-sm text-muted-foreground text-center">
         <p>
-          PDF-ul este afișat de pe site-ul oficial CNAS.{' '}
+          PDF-ul este afișat de pe {pdfSource}.{' '}
           <a
-            href={protocol.officialPdfUrl}
+            href={pdfUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="text-medical-blue hover:underline"
