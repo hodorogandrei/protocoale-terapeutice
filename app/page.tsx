@@ -9,12 +9,14 @@ import { formatDateShort } from '@/lib/utils'
 
 async function getStats() {
   try {
-    const res = await fetch(`http://localhost:3000/api/stats`, {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:4444'
+    const res = await fetch(`${baseUrl}/api/stats`, {
       cache: 'no-store',
     })
     if (!res.ok) return null
     return res.json()
   } catch (error) {
+    console.error('Error fetching stats:', error)
     return null
   }
 }
@@ -196,6 +198,16 @@ function getCategoryIcon(category: string): string {
     'Psihiatrie': '🧘',
     'Dermatologie': '🩹',
     'Oftalmologie': '👁️',
+    'Imunologie': '🛡️',
+    'Boli Infecțioase': '🦠',
+    'Ginecologie': '👩‍⚕️',
+    'Urologie': '🩺',
+    'Pediatrie': '👶',
+    'Ortopedice': '🦿',
+    'Anestezie': '💊',
+    'ORL': '👂',
+    'Parazitologie': '🔬',
+    'Diverse': '📋',
   }
   return icons[category] || '📋'
 }

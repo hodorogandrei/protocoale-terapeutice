@@ -5,12 +5,14 @@ import { Separator } from '@/components/ui/separator'
 
 async function getStats() {
   try {
-    const res = await fetch(`http://localhost:3000/api/stats`, {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:4444'
+    const res = await fetch(`${baseUrl}/api/stats`, {
       cache: 'no-store',
     })
     if (!res.ok) return null
     return res.json()
   } catch (error) {
+    console.error('Error fetching stats:', error)
     return null
   }
 }
