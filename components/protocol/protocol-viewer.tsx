@@ -24,7 +24,7 @@ export function ProtocolViewer({ protocol }: ProtocolViewerProps) {
       <div className="space-y-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
               <Badge variant="outline" className="text-lg px-3 py-1">
                 {protocol.code}
               </Badge>
@@ -42,6 +42,21 @@ export function ProtocolViewer({ protocol }: ProtocolViewerProps) {
               >
                 Calitate: {protocol.extractionQuality.toFixed(0)}%
               </Badge>
+              {protocol.status === 'variant' && (
+                <Badge variant="outline" className="border-gray-400 text-gray-600">
+                  Variantă / Cod Genetic
+                </Badge>
+              )}
+              {protocol.status === 'pending' && (
+                <Badge variant="outline" className="border-yellow-400 text-yellow-700">
+                  În verificare
+                </Badge>
+              )}
+              {protocol.status === 'discontinued' && (
+                <Badge variant="outline" className="border-red-400 text-red-700">
+                  Discontinuat
+                </Badge>
+              )}
             </div>
 
             <h1 className="text-3xl md:text-4xl font-bold mb-3">
@@ -58,18 +73,25 @@ export function ProtocolViewer({ protocol }: ProtocolViewerProps) {
 
         {/* Metadata */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {protocol.lastUpdateDate && (
+          {protocol.lastCnasUpdate && (
             <div className="text-sm">
-              <div className="text-muted-foreground">Ultima Actualizare</div>
+              <div className="text-muted-foreground">Ultima Actualizare CNAS</div>
               <div className="font-semibold">
-                {formatDateShort(protocol.lastUpdateDate)}
+                {formatDateShort(protocol.lastCnasUpdate)}
               </div>
+            </div>
+          )}
+
+          {protocol.cnasOrderNumber && (
+            <div className="text-sm">
+              <div className="text-muted-foreground">Ordin CNAS</div>
+              <div className="font-semibold">{protocol.cnasOrderNumber}</div>
             </div>
           )}
 
           {protocol.orderNumber && (
             <div className="text-sm">
-              <div className="text-muted-foreground">Ordin</div>
+              <div className="text-muted-foreground">Ordin MS/CNAS</div>
               <div className="font-semibold">{protocol.orderNumber}</div>
             </div>
           )}
@@ -90,6 +112,36 @@ export function ProtocolViewer({ protocol }: ProtocolViewerProps) {
             </div>
           )}
         </div>
+
+        {/* Status Warning/Info */}
+        {(protocol.status === 'variant' || protocol.status === 'pending' || protocol.status === 'discontinued') && protocol.statusReason && (
+          <div className={`rounded-lg p-4 ${
+            protocol.status === 'variant' ? 'bg-gray-50 border border-gray-200' :
+            protocol.status === 'pending' ? 'bg-yellow-50 border border-yellow-200' :
+            'bg-red-50 border border-red-200'
+          }`}>
+            <div className="flex gap-2">
+              <span className="text-lg">{
+                protocol.status === 'variant' ? 'ℹ️' :
+                protocol.status === 'pending' ? '⚠️' :
+                '🚫'
+              }</span>
+              <div>
+                <div className="font-semibold mb-1">
+                  {protocol.status === 'variant' && 'Cod Variantă / Genetic'}
+                  {protocol.status === 'pending' && 'Protocol în Verificare'}
+                  {protocol.status === 'discontinued' && 'Protocol Discontinuat'}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {protocol.statusReason}
+                  {protocol.parentProtocolCode && (
+                    <> Verificați protocolul principal: <strong>{protocol.parentProtocolCode}</strong></>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Categories and Prescribers */}
         <div className="flex flex-wrap gap-2">

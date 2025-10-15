@@ -17,11 +17,26 @@ export function ProtocolCard({ protocol }: ProtocolCardProps) {
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               <Badge variant="outline">{protocol.code}</Badge>
               {protocol.verified && (
                 <Badge variant="secondary" className="text-xs">
                   Verificat
+                </Badge>
+              )}
+              {protocol.status === 'variant' && (
+                <Badge variant="outline" className="text-xs border-gray-400 text-gray-600">
+                  Variantă
+                </Badge>
+              )}
+              {protocol.status === 'pending' && (
+                <Badge variant="outline" className="text-xs border-yellow-400 text-yellow-700">
+                  În verificare
+                </Badge>
+              )}
+              {protocol.status === 'discontinued' && (
+                <Badge variant="outline" className="text-xs border-red-400 text-red-700">
+                  Discontinuat
                 </Badge>
               )}
             </div>
