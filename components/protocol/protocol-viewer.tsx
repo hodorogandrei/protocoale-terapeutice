@@ -144,7 +144,7 @@ export function ProtocolViewer({ protocol }: ProtocolViewerProps) {
       <Separator />
 
       {/* Viewing Modes */}
-      <Tabs defaultValue="structured" value={viewMode} onValueChange={(v) => setViewMode(v as any)}>
+      <Tabs defaultValue="structured" value={viewMode} onValueChange={(v) => setViewMode(v as 'structured' | 'document' | 'pdf')}>
         <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-3">
           <TabsTrigger value="structured">
             {UI_TEXT.protocol.viewModes.structured}

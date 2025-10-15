@@ -24,9 +24,10 @@ async function getProtocol(code: string): Promise<Protocol | null> {
 export default async function ProtocolPage({
   params,
 }: {
-  params: { code: string }
+  params: Promise<{ code: string }>
 }) {
-  const protocol = await getProtocol(params.code)
+  const { code } = await params
+  const protocol = await getProtocol(code)
 
   if (!protocol) {
     notFound()
@@ -60,9 +61,10 @@ export default async function ProtocolPage({
 export async function generateMetadata({
   params,
 }: {
-  params: { code: string }
+  params: Promise<{ code: string }>
 }) {
-  const protocol = await getProtocol(params.code)
+  const { code } = await params
+  const protocol = await getProtocol(code)
 
   if (!protocol) {
     return {
