@@ -1,13 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { code: string } }
+  request: Request,
+  { params }: { params: Promise<{ code: string }> }
 ) {
+  const { code } = await params
   try {
     const protocol = await db.protocol.findUnique({
-      where: { code: params.code },
+      where: { code },
       include: {
         images: {
           orderBy: { position: 'asc' },
