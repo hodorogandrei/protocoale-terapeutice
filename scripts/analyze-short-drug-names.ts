@@ -82,7 +82,7 @@ async function analyzeShortDrugNames() {
         title: protocol.title,
         dci: protocol.dci,
         suggestedTitle: suggestedTitle !== protocol.title ? suggestedTitle : undefined,
-        suggestedDci: suggestedDci !== protocol.dci ? suggestedDci : undefined,
+        suggestedDci: suggestedDci !== protocol.dci ? (suggestedDci || undefined) : undefined,
         matchedPattern: titleMatch || dciMatch || 'unknown',
         confidence,
       });

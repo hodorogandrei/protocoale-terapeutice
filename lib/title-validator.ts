@@ -126,12 +126,20 @@ export function isTitleCorrupted(title: string): boolean {
 }
 
 /**
+ * Escape special regex characters in a string
+ */
+function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
  * Extract proper title from protocol rawText content
  */
-export function extractTitleFromRawText(code: string, rawText: string): string | null {
+export function extractTitleFromRawText(rawText: string, code: string): string | null {
   if (!rawText) return null;
 
   const lines = rawText.split('\n');
+  const escapedCode = escapeRegExp(code);
 
   // Strategy 1: Look for "Protocol terapeutic ... cod (CODE): DCI TITLE" pattern
   for (let i = 0; i < Math.min(20, lines.length); i++) {
@@ -139,7 +147,7 @@ export function extractTitleFromRawText(code: string, rawText: string): string |
 
     // Match protocol header with this specific code
     const headerMatch = line.match(
-      new RegExp(`Protocol\\s+terapeutic.*?cod\\s*\\(${code}\\):\\s*(?:DCI\\s+)?(.+?)$`, 'i')
+      new RegExp(`Protocol\\s+terapeutic.*?cod\\s*\\(${escapedCode}\\):\\s*(?:DCI\\s+)?(.+?)$`, 'i')
     );
 
     if (headerMatch && headerMatch[1]) {
@@ -158,7 +166,7 @@ export function extractTitleFromRawText(code: string, rawText: string): string |
     }
 
     // Sometimes DCI is on the next line
-    if (line.match(new RegExp(`Protocol\\s+terapeutic.*?cod\\s*\\(${code}\\).*DCI\\s*$`, 'i'))) {
+    if (line.match(new RegExp(`Protocol\\s+terapeutic.*?cod\\s*\\(${escapedCode}\\).*DCI\\s*$`, 'i'))) {
       const nextLine = lines[i + 1]?.trim();
       if (nextLine && nextLine.length > 3 && nextLine.length < 150) {
         // Check if it looks like a drug name (uppercase or capitalized)
@@ -229,7 +237,7 @@ export function validateAndCorrectTitle(
   }
 
   // Try to extract from raw text
-  const extractedTitle = extractTitleFromRawText(code, rawText);
+  const extractedTitle = extractTitleFromRawText(rawText, code);
   if (extractedTitle && extractedTitle.length > 3) {
     return extractedTitle;
   }
