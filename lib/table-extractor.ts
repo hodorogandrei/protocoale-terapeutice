@@ -6,6 +6,7 @@
  */
 
 import { PDFExtract, PDFExtractPage, PDFExtractText } from 'pdf.js-extract'
+import { enhanceProtocolDrugNames } from './drug-name-enhancer'
 
 export interface TableCell {
   text: string
@@ -457,14 +458,15 @@ function parseProtocolRow(row: TableRow, pageNumber: number): ExtractedProtocol 
   if (/[a-zA-ZăâîșțĂÂÎȘȚ]{3,}/.test(title)) confidence += 10 // Contains actual words (including Romanian chars)
   if (!title.match(/poziţiei|corespunz|ă tor/i)) confidence += 5 // Doesn't contain corrupted fragments
 
-  return {
+  // Enhance drug names before returning
+  return enhanceProtocolDrugNames({
     code,
     title,
     dci,
     additionalInfo: row.cells.length > 2 ? row.cells.slice(2).map(c => c.text).join(' ').trim() : undefined,
     pageNumber,
     confidence
-  }
+  })
 }
 
 /**
@@ -533,13 +535,14 @@ export function parseProtocolsFromText(text: string): ExtractedProtocol[] {
         title = title.replace(dci, '').replace(/[()]/g, '').trim()
       }
 
-      protocols.push({
+      // Enhance drug names before adding to protocols
+      protocols.push(enhanceProtocolDrugNames({
         code,
         title,
         dci,
         pageNumber: 0, // Unknown from raw text
         confidence: 60 // Lower confidence than table extraction
-      })
+      }))
     }
   }
 

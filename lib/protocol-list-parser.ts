@@ -15,6 +15,7 @@ import {
   mergeProtocols,
   ExtractedProtocol
 } from './table-extractor'
+import { enhanceProtocolDrugNames } from './drug-name-enhancer'
 
 export interface ParsedProtocol {
   code: string
@@ -480,6 +481,11 @@ export function enhanceProtocols(protocols: ParsedProtocol[]): ParsedProtocol[] 
       .replace(/^[\s\-–—:]+/, '') // Remove leading punctuation
       .replace(/[\s\-–—:]+$/, '') // Remove trailing punctuation
       .trim()
+
+    // Apply drug name enhancements (expand short names like LISPRO → INSULINUM LISPRO)
+    const enhanced = enhanceProtocolDrugNames(protocol)
+    protocol.title = enhanced.title
+    protocol.dci = enhanced.dci
 
     return protocol
   })
