@@ -47,9 +47,48 @@ export default async function HomePage() {
             </div>
 
             {/* Search Bar */}
-            <div className="max-w-3xl mx-auto mb-12">
+            <div className="max-w-3xl mx-auto mb-8">
               <div className="bg-white rounded-lg shadow-lg p-6">
                 <SearchBar />
+              </div>
+            </div>
+
+            {/* Disclaimer and Mentions */}
+            <div className="max-w-3xl mx-auto mb-12">
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm">
+                <div className="flex items-start gap-3">
+                  <div className="text-amber-600 text-xl mt-0.5">ℹ️</div>
+                  <div className="flex-1 space-y-2">
+                    <p className="text-gray-800 font-medium">
+                      Platformă informațională neoficială
+                    </p>
+                    <div className="text-gray-700 space-y-1.5">
+                      <p>
+                        Această platformă oferă acces simplificat la protocoalele terapeutice publicate de{' '}
+                        <a
+                          href="https://cnas.ro/protocoale-terapeutice/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-medical-blue hover:underline font-medium"
+                        >
+                          CNAS
+                        </a>
+                        . Informațiile sunt extrase automat și pot conține erori sau întârzieri față de sursa oficială.
+                      </p>
+                      <p>
+                        <strong>Nu reprezintă sfat medical.</strong> Pentru decizii terapeutice, consultați întotdeauna un medic specialist. Sursa oficială: {' '}
+                        <a
+                          href="https://cnas.ro/protocoale-terapeutice/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-medical-blue hover:underline"
+                        >
+                          cnas.ro/protocoale-terapeutice
+                        </a>
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -141,7 +180,7 @@ export default async function HomePage() {
 
               <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {Object.entries(stats.categoryCounts)
-                  .slice(0, 8)
+                  .sort(([, a], [, b]) => (b as number) - (a as number))
                   .map(([category, count]) => (
                     <CategoryCard
                       key={category}
@@ -149,6 +188,7 @@ export default async function HomePage() {
                       icon={getCategoryIcon(category)}
                       count={count as number}
                       href={`/protocoale?category=${encodeURIComponent(category)}`}
+                      description={getCategoryDescription(category)}
                     />
                   ))}
               </div>
@@ -214,4 +254,32 @@ function getCategoryIcon(category: string): string {
     'Diverse': '📋',
   }
   return icons[category] || '📋'
+}
+
+function getCategoryDescription(category: string): string {
+  const descriptions: Record<string, string> = {
+    'Oncologie': 'Protocoale pentru tratamentul cancerului și terapii oncologice',
+    'Reumatologie': 'Tratamente pentru afecțiuni reumatismale și articulare',
+    'Cardiologie': 'Protocoale pentru afecțiuni cardiovasculare',
+    'Neurologie': 'Tratamente pentru afecțiuni neurologice și cerebrale',
+    'Endocrinologie': 'Protocoale pentru diabet, hormoni și metabolism',
+    'Pneumologie': 'Tratamente pentru afecțiuni respiratorii',
+    'Gastroenterologie': 'Protocoale pentru afecțiuni digestive și hepatice',
+    'Hematologie': 'Tratamente pentru afecțiuni hematologice și sanguine',
+    'Nefrologie': 'Protocoale pentru afecțiuni renale',
+    'Psihiatrie': 'Tratamente pentru afecțiuni psihiatrice și mentale',
+    'Dermatologie': 'Protocoale pentru afecțiuni dermatologice',
+    'Oftalmologie': 'Tratamente pentru afecțiuni oftalmologice',
+    'Imunologie': 'Protocoale pentru afecțiuni imunitare și imunoterapie',
+    'Boli Infecțioase': 'Tratamente pentru boli infecțioase și antivirale',
+    'Ginecologie': 'Protocoale pentru afecțiuni ginecologice',
+    'Urologie': 'Tratamente pentru afecțiuni urologice',
+    'Pediatrie': 'Protocoale pentru copii și nou-născuți',
+    'Ortopedice': 'Tratamente pentru afecțiuni osoase și articulare',
+    'Anestezie': 'Protocoale pentru anestezie și analgezie',
+    'ORL': 'Tratamente pentru afecțiuni ORL',
+    'Parazitologie': 'Protocoale pentru boli parazitare',
+    'Diverse': 'Alte protocoale terapeutice',
+  }
+  return descriptions[category] || 'Protocoale terapeutice'
 }

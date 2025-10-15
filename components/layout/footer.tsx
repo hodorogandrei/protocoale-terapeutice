@@ -52,7 +52,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="https://cnas.ro"
+                  href="https://cnas.ro/protocoale-terapeutice/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-muted-foreground hover:text-medical-blue"
@@ -77,7 +77,7 @@ export function Footer() {
           <p className="text-center text-sm text-muted-foreground">
             © {new Date().getFullYear()} Protocoale Terapeutice România. Date furnizate de{' '}
             <a
-              href="https://cnas.ro"
+              href="https://cnas.ro/protocoale-terapeutice/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-medical-blue hover:underline"
