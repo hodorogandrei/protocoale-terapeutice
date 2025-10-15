@@ -56,6 +56,11 @@ export async function GET(request: NextRequest) {
         updatedAt: true,
         sublists: true,
         prescribers: true,
+        status: true,
+        statusReason: true,
+        parentProtocolCode: true,
+        lastCnasUpdate: true,
+        cnasOrderNumber: true,
       },
     })
 
